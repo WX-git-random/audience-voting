@@ -1,40 +1,43 @@
+import { getResults } from "@/app/actions/vote"
 import { HudFrame } from "@/components/hud-frame"
-import { VoteForm } from "@/components/vote-form"
+import { ResultsView } from "@/components/results-view"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "投票通道 · 辩论投票系统",
-  description: "使用注册邮箱投票支持正方或反方，并评选最佳辩手。",
+  title: "实时开票 · 辩论投票系统",
+  description: "正方与反方实时得票，以及最佳辩手前三名。",
 }
 
+// Always render fresh counts on load; the client then polls every 4s.
+export const dynamic = "force-dynamic"
+
 /**
- * Audience-facing voting page.
+ * Results display page, intended for the projector / big screen.
  *
- * Deliberately renders ONLY the ballot — no live tally, no admin entry point.
- * Keeping the running results off this page avoids a bandwagon effect where
- * voters are swayed by the current standings, and leaves the projector view
- * ("/") as the single place results are shown.
+ * Deliberately renders ONLY the tally — no ballot, no admin entry point — so it
+ * can be left on screen during the debate without exposing controls. Voting
+ * lives on "/".
  */
-export default function ViewPage() {
+export default async function ViewPage() {
+  const results = await getResults()
+
   return (
     <HudFrame>
-      <main className="mx-auto flex min-h-svh max-w-2xl flex-col justify-center gap-8 px-6 py-16 md:px-14">
+      <main className="mx-auto flex min-h-svh max-w-5xl flex-col justify-center gap-8 px-6 py-16 md:px-14">
         <header className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <span className="size-2 animate-hud-pulse bg-magenta" />
             <span className="font-mono text-[11px] tracking-[0.32em] text-magenta uppercase">
-              Ballot Open · 投票进行中
+              Live · 实时开票
             </span>
           </div>
-          <h1 className="font-display text-3xl font-black tracking-[0.04em] text-balance md:text-5xl">
-            辩论<span className="text-violet text-glow-violet">投票</span>
+          <h1 className="font-display text-4xl font-black tracking-[0.04em] text-balance md:text-6xl">
+            辩论投票<span className="text-violet text-glow-violet">结果</span>
           </h1>
-          <p className="text-sm leading-relaxed text-muted">
-            请使用你注册时提交的电子邮箱投票。投票可随时修改，以最后一次提交为准。
-          </p>
+          <p className="text-sm leading-relaxed text-muted">结果每 4 秒自动刷新。</p>
         </header>
 
-        <VoteForm />
+        <ResultsView initial={results} />
 
         <footer className="flex items-center justify-center border-t border-panel-edge pt-6">
           <span className="font-mono text-[10px] tracking-[0.28em] text-muted uppercase">
