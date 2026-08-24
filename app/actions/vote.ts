@@ -57,27 +57,26 @@ export async function submitVote(input: {
     return { status: "error", message: "请选择最佳辩手" }
   }
 
-  // Anyone who has already voted may always change their vote, so we only hit
-  // the Google Sheet for first-time voters.
-  const existing = await db.select({ email: votes.email }).from(votes).where(eq(votes.email, email)).limit(1)
+  // The allowlist is checked on EVERY submission, including vote changes.
+  // Previously this was skipped for emails already in the votes table, which
+  // permanently grandfathered in anyone who voted while the Google credentials
+  // were missing — they could keep voting forever. Re-checking every time also
+  // means removing someone from the sheet actually revokes their access.
+  const allowlist = await loadRegisteredEmails()
 
-  if (existing.length === 0) {
-    const allowlist = await loadRegisteredEmails()
-
-    if (allowlist.status === "error") {
-      return {
-        status: "error",
-        message: "无法验证注册名单，请稍后再试。",
-      }
+  if (allowlist.status === "error") {
+    return {
+      status: "error",
+      message: "无法验证注册名单，请稍后再试。",
     }
+  }
 
-    // When credentials are absent the allowlist cannot be enforced; voting stays
-    // open so the app remains usable, and the UI surfaces a warning banner.
-    if (allowlist.status === "ok" && !allowlist.emails.has(email)) {
-      return {
-        status: "unregistered",
-        message: "请先提交 Google Form 进行注册",
-      }
+  // When credentials are absent the allowlist cannot be enforced; voting stays
+  // open so the app remains usable, and the UI surfaces a warning banner.
+  if (allowlist.status === "ok" && !allowlist.emails.has(email)) {
+    return {
+      status: "unregistered",
+      message: "请先提交 Google Form 进行注册",
     }
   }
 

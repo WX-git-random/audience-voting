@@ -23,7 +23,15 @@ export function ResultsView({ initial }: { initial: Results }) {
   const { total, teamCounts, speakerCounts } = results
 
   const maxSpeaker = Math.max(1, ...SPEAKERS.map((s) => speakerCounts[s] ?? 0))
-  const rankedSpeakers = [...SPEAKERS].sort((a, b) => (speakerCounts[b] ?? 0) - (speakerCounts[a] ?? 0))
+  // Sort by count desc, then by the fixed SPEAKERS order so equal counts keep a
+  // stable position instead of jumping around on every 4s refresh.
+  const topSpeakers = [...SPEAKERS]
+    .sort(
+      (a, b) =>
+        (speakerCounts[b] ?? 0) - (speakerCounts[a] ?? 0) ||
+        SPEAKERS.indexOf(a) - SPEAKERS.indexOf(b),
+    )
+    .slice(0, 3)
 
   return (
     <div className="flex flex-col gap-6">
@@ -79,22 +87,33 @@ export function ResultsView({ initial }: { initial: Results }) {
       {/* Best debater */}
       <HudPanel accent="magenta" className="p-6 md:p-8">
         <div className="flex flex-col gap-5">
-          <HudLabel>Best Debater / 最佳辩手</HudLabel>
+          <HudLabel>Best Debater · Top 3 / 最佳辩手 前三名</HudLabel>
 
           {total === 0 ? (
             <p className="font-mono text-sm tracking-widest text-muted">// 暂无投票数据</p>
           ) : (
-            <ul className="flex flex-col gap-3">
-              {rankedSpeakers.map((speaker, i) => {
+            <ul className="flex flex-col gap-4">
+              {topSpeakers.map((speaker, i) => {
                 const count = speakerCounts[speaker] ?? 0
                 const isAff = teamOf(speaker) === "正方"
+                const isFirst = i === 0
                 return (
-                  <li key={speaker} className="flex items-center gap-3">
-                    <span className="w-6 font-mono text-[11px] text-muted">
-                      {String(i + 1).padStart(2, "0")}
+                  <li key={speaker} className="flex items-center gap-4">
+                    <span
+                      className={`w-8 shrink-0 font-mono font-bold tabular-nums ${
+                        isFirst ? "text-2xl text-magenta text-glow-magenta" : "text-lg text-muted"
+                      }`}
+                    >
+                      {i + 1}
                     </span>
-                    <span className="w-24 shrink-0 text-sm">{speaker}</span>
-                    <div className="h-5 flex-1 bg-panel-edge/30">
+                    <span
+                      className={`shrink-0 font-display tracking-[0.04em] ${
+                        isFirst ? "w-28 text-lg font-black" : "w-28 text-base font-bold"
+                      }`}
+                    >
+                      {speaker}
+                    </span>
+                    <div className={`flex-1 bg-panel-edge/30 ${isFirst ? "h-7" : "h-5"}`}>
                       <div
                         className={`h-full transition-all duration-700 ease-out ${
                           isAff ? "bg-aff" : "bg-neg"
@@ -102,7 +121,13 @@ export function ResultsView({ initial }: { initial: Results }) {
                         style={{ width: `${(count / maxSpeaker) * 100}%` }}
                       />
                     </div>
-                    <span className="w-8 text-right font-mono text-sm">{count}</span>
+                    <span
+                      className={`w-10 shrink-0 text-right font-mono tabular-nums ${
+                        isFirst ? "text-xl font-bold" : "text-base"
+                      }`}
+                    >
+                      {count}
+                    </span>
                   </li>
                 )
               })}
