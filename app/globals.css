@@ -8,10 +8,19 @@
   --color-panel-edge: #3a1a5c;
   --color-muted: #9a7fc0;
 
-  /* 正方 / affirmative */
+  /* Shared HUD chrome accents (brackets, buttons, focus rings).
+     These are NOT the team colors — see --color-aff / --color-neg below. */
   --color-violet: #a855f7;
-  /* 反方 / negative */
   --color-magenta: #ec1d63;
+
+  /* Team identity. 正方 / affirmative */
+  --color-aff: #ff3884;
+  /* Team identity. 反方 / negative */
+  --color-neg: #5a23a4;
+  /* #5a23a4 only reaches ~2.2:1 against the near-black background, so large
+     numerals in it are barely legible. This same-hue tint (~5.7:1) is used for
+     反方 TEXT while the exact brand color stays on fills and borders. */
+  --color-neg-lit: #a06ce5;
 
   --font-sans: var(--font-noto-sans-sc), ui-sans-serif, system-ui, sans-serif;
   /* Orbitron has no CJK glyphs, so Chinese in a "mono" label falls through
@@ -83,6 +92,17 @@
 
 @utility text-glow-magenta {
   text-shadow: 0 0 12px rgba(236, 29, 99, 0.65);
+}
+
+/* 正方 #ff3884 */
+@utility text-glow-aff {
+  text-shadow: 0 0 14px rgba(255, 56, 132, 0.7);
+}
+
+/* 反方 — glow uses the brand purple even though the glyph uses the lighter
+   tint, which keeps the team read intact. */
+@utility text-glow-neg {
+  text-shadow: 0 0 14px rgba(90, 35, 164, 0.9);
 }
 
 @keyframes hud-sweep {
