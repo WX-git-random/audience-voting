@@ -63,8 +63,8 @@ export function VoteForm() {
                   className={`hud-clip-sm cursor-pointer border px-4 py-4 text-center text-base transition-all ${
                     active
                       ? isAff
-                        ? "border-violet bg-violet/20 text-glow-violet"
-                        : "border-magenta bg-magenta/20 text-glow-magenta"
+                        ? "border-aff bg-aff/25 text-glow-aff"
+                        : "border-neg-lit bg-neg/40 text-glow-neg"
                       : "border-panel-edge text-muted hover:border-violet/60 hover:text-foreground"
                   }`}
                 >
@@ -98,8 +98,8 @@ export function VoteForm() {
                   className={`hud-clip-sm cursor-pointer border px-2 py-3 text-center text-sm transition-all ${
                     active
                       ? isAff
-                        ? "border-violet bg-violet/20"
-                        : "border-magenta bg-magenta/20"
+                        ? "border-aff bg-aff/25"
+                        : "border-neg-lit bg-neg/40"
                       : "border-panel-edge text-muted hover:border-violet/60 hover:text-foreground"
                   }`}
                 >

@@ -50,7 +50,7 @@ export function ResultsView({ initial }: { initial: Results }) {
                     <div key={team} className="flex flex-col items-center gap-2">
                       <span
                         className={`font-mono text-5xl font-bold md:text-6xl ${
-                          isAff ? "text-violet text-glow-violet" : "text-magenta text-glow-magenta"
+                          isAff ? "text-aff text-glow-aff" : "text-neg-lit text-glow-neg"
                         }`}
                       >
                         {pct.toFixed(0)}
@@ -66,12 +66,10 @@ export function ResultsView({ initial }: { initial: Results }) {
               {/* Single split bar instead of a pie — far more readable */}
               <div className="hud-clip-sm flex h-8 w-full overflow-hidden border border-panel-edge">
                 <div
-                  className="flex items-center justify-end bg-violet/80 transition-all duration-700 ease-out"
+                  className="flex items-center justify-end bg-aff transition-all duration-700 ease-out"
                   style={{ width: `${total > 0 ? ((teamCounts["正方"] ?? 0) / total) * 100 : 50}%` }}
                 />
-                <div
-                  className="flex-1 bg-magenta/80 transition-all duration-700 ease-out"
-                />
+                <div className="flex-1 bg-neg transition-all duration-700 ease-out" />
               </div>
             </>
           )}
@@ -99,7 +97,7 @@ export function ResultsView({ initial }: { initial: Results }) {
                     <div className="h-5 flex-1 bg-panel-edge/30">
                       <div
                         className={`h-full transition-all duration-700 ease-out ${
-                          isAff ? "bg-violet/80" : "bg-magenta/80"
+                          isAff ? "bg-aff" : "bg-neg"
                         }`}
                         style={{ width: `${(count / maxSpeaker) * 100}%` }}
                       />
