@@ -21,7 +21,7 @@ export default async function Page() {
               Live · 实时开票
             </span>
           </div>
-          <h1 className="font-mono text-4xl font-black tracking-tight text-balance md:text-6xl">
+          <h1 className="font-display text-4xl font-black tracking-[0.04em] text-balance md:text-6xl">
             辩论投票<span className="text-violet text-glow-violet">系统</span>
           </h1>
           <p className="max-w-xl text-sm leading-relaxed text-muted">

@@ -56,7 +56,7 @@ export function ResultsView({ initial }: { initial: Results }) {
                         {pct.toFixed(0)}
                         <span className="text-2xl">%</span>
                       </span>
-                      <span className="text-lg font-medium">{team}</span>
+                      <span className="font-display text-xl font-black tracking-[0.06em]">{team}</span>
                       <span className="font-mono text-xs tracking-[0.2em] text-muted">{count} 票</span>
                     </div>
                   )

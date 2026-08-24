@@ -2,10 +2,15 @@ import type { Metadata, Viewport } from "next"
 import { Noto_Sans_SC, Orbitron } from "next/font/google"
 import "./globals.css"
 
+// "chinese-simplified" is required — without it no Chinese glyph is ever
+// downloaded and the browser silently falls back to a system font.
+// preload is off because the CJK subset is large.
 const notoSansSC = Noto_Sans_SC({
-  subsets: ["latin"],
+  subsets: ["latin", "chinese-simplified"],
   variable: "--font-noto-sans-sc",
-  weight: ["300", "400", "500", "700"],
+  weight: ["400", "500", "700", "900"],
+  display: "swap",
+  preload: false,
 })
 
 const orbitron = Orbitron({
