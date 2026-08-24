@@ -2,11 +2,12 @@ import type { Metadata, Viewport } from "next"
 import { Noto_Sans_SC, Orbitron } from "next/font/google"
 import "./globals.css"
 
-// "chinese-simplified" is required — without it no Chinese glyph is ever
-// downloaded and the browser silently falls back to a system font.
-// preload is off because the CJK subset is large.
+// `subsets` is deliberately omitted: next/font only types the Latin-ish
+// subsets for this family, so naming a CJK subset fails the production type
+// check. Omitting it fetches every unicode range (including CJK), which is
+// what actually renders the Chinese glyphs. `preload: false` is REQUIRED
+// here — without a subset, preloading the full CJK font is rejected.
 const notoSansSC = Noto_Sans_SC({
-  subsets: ["latin", "chinese-simplified"],
   variable: "--font-noto-sans-sc",
   weight: ["400", "500", "700", "900"],
   display: "swap",
