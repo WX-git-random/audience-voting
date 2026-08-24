@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #07020e;
+  --color-foreground: #ece3f8;
+
+  --color-panel: #170829;
+  --color-panel-edge: #3a1a5c;
+  --color-muted: #9a7fc0;
+
+  /* 正方 / affirmative */
+  --color-violet: #a855f7;
+  /* 反方 / negative */
+  --color-magenta: #ec1d63;
+
+  --font-sans: var(--font-noto-sans-sc), ui-sans-serif, system-ui, sans-serif;
+  /* Orbitron has no CJK glyphs, so Chinese in a "mono" label falls through
+     to Noto Sans SC instead of an arbitrary system font. */
+  --font-mono: var(--font-orbitron), var(--font-noto-sans-sc), ui-monospace, monospace;
+
+  /* Heavy blocky heiti used for the main title. */
+  --font-display: var(--font-noto-sans-sc), ui-sans-serif, system-ui, sans-serif;
+
+  --radius: 0px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-panel-edge);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+}
+
+@utility hud-grid {
+  /* Deep purple wash that fades to black at the top-left, matching the brief. */
+  background-image:
+    radial-gradient(120% 120% at 78% 82%, rgba(124, 58, 190, 0.55) 0%, transparent 62%),
+    radial-gradient(90% 90% at 8% 6%, #000000 0%, transparent 58%),
+    linear-gradient(155deg, #07020e 0%, #1b0733 55%, #2a0c47 100%);
+}
+
+/* Angular clipped panel — the signature shape of the interface. */
+@utility hud-clip {
+  clip-path: polygon(
+    22px 0,
+    100% 0,
+    100% calc(100% - 22px),
+    calc(100% - 22px) 100%,
+    0 100%,
+    0 22px
+  );
+}
+
+@utility hud-clip-sm {
+  clip-path: polygon(
+    12px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%,
+    0 12px
+  );
+}
+
+/* Diagonal stripe fill used in the corner bars of the reference art. */
+@utility hud-stripes {
+  background-image: repeating-linear-gradient(
+    115deg,
+    currentColor 0px,
+    currentColor 5px,
+    transparent 5px,
+    transparent 11px
+  );
+}
+
+@utility text-glow-violet {
+  text-shadow: 0 0 12px rgba(168, 85, 247, 0.65);
+}
+
+@utility text-glow-magenta {
+  text-shadow: 0 0 12px rgba(236, 29, 99, 0.65);
+}
+
+@keyframes hud-sweep {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(400%);
+  }
+}
+
+@keyframes hud-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@utility animate-hud-pulse {
+  animation: hud-pulse 2s ease-in-out infinite;
+}
+
+@utility animate-hud-sweep {
+  animation: hud-sweep 7s linear infinite;
+}
