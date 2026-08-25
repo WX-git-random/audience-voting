@@ -1,5 +1,6 @@
 import { HudFrame, HudPanel } from "@/components/hud-frame"
 import { VoteForm } from "@/components/vote-form"
+import { isVotingLocked } from "@/lib/vote-lock"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -15,19 +16,24 @@ export const metadata: Metadata = {
  * voters are swayed by the current standings, and leaves the projector view
  * ("/view") as the single place results are shown.
  */
-export default function Page() {
+export const dynamic = "force-dynamic"
+
+export default async function Page() {
   const allowlistConfigured = Boolean(
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON && process.env.GOOGLE_SHEET_ID,
   )
+  const locked = await isVotingLocked()
 
   return (
     <HudFrame>
       <main className="mx-auto flex min-h-svh max-w-2xl flex-col justify-center gap-8 px-6 py-16 md:px-14">
         <header className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
-            <span className="size-2 animate-hud-pulse bg-magenta" />
+            <span
+              className={`size-2 bg-magenta ${locked ? "opacity-40" : "animate-hud-pulse"}`}
+            />
             <span className="font-mono text-[11px] tracking-[0.32em] text-magenta uppercase">
-              Ballot Open · 投票进行中
+              {locked ? "Ballot Locked · 投票已关闭" : "Ballot Open · 投票进行中"}
             </span>
           </div>
           <h1 className="font-display text-3xl font-black tracking-[0.04em] text-balance md:text-5xl">
@@ -46,7 +52,7 @@ export default function Page() {
           </HudPanel>
         )}
 
-        <VoteForm />
+        <VoteForm initialLocked={locked} />
 
         <footer className="flex items-center justify-center border-t border-panel-edge pt-6">
           <span className="font-mono text-[10px] tracking-[0.28em] text-muted uppercase">

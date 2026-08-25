@@ -12,35 +12,38 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic"
 
 /**
- * Results display page, intended for the projector / big screen.
+ * Results display page, intended for the auditorium LED wall.
  *
- * Deliberately renders ONLY the tally — no ballot, no admin entry point — so it
- * can be left on screen during the debate without exposing controls. Voting
- * lives on "/".
+ * Fills the viewport exactly (h-svh, no scroll) and sizes everything in
+ * viewport units so it reads from the back of a hall. Renders ONLY the tally —
+ * no ballot, no admin entry point — so it can be left up during the debate.
+ * Voting lives on "/".
  */
 export default async function ViewPage() {
   const results = await getResults()
+  const locked = results.locked ?? false
 
   return (
     <HudFrame>
-      <main className="mx-auto flex min-h-svh max-w-5xl flex-col justify-center gap-8 px-6 py-16 md:px-14">
-        <header className="flex flex-col gap-4">
+      <main className="flex h-svh flex-col gap-[1.6vh] overflow-hidden px-[3vw] py-[2.5vh]">
+        {/* The HUD chrome owns the top-right corner, so the header keeps to the
+            left half and the org credit sits on its own bottom line. */}
+        <header className="flex flex-col gap-[0.6vh] pr-[18rem]">
           <div className="flex items-center gap-3">
-            <span className="size-2 animate-hud-pulse bg-magenta" />
-            <span className="font-mono text-[11px] tracking-[0.32em] text-magenta uppercase">
-              Live · 实时开票
+            <span className={`size-2 bg-magenta ${locked ? "opacity-40" : "animate-hud-pulse"}`} />
+            <span className="font-mono text-[clamp(0.7rem,min(1.1vw,2vh),1.35rem)] tracking-[0.32em] text-magenta uppercase">
+              {locked ? "Final · 投票已关闭" : "Live · 实时开票"}
             </span>
           </div>
-          <h1 className="font-display text-4xl font-black tracking-[0.04em] text-balance md:text-6xl">
+          <h1 className="font-display font-black leading-none tracking-[0.04em] text-balance text-[clamp(1.75rem,min(5.5vw,9vh),7rem)]">
             辩论投票<span className="text-violet text-glow-violet">结果</span>
           </h1>
-          <p className="text-sm leading-relaxed text-muted">结果每 4 秒自动刷新。</p>
         </header>
 
         <ResultsView initial={results} />
 
-        <footer className="flex items-center justify-center border-t border-panel-edge pt-6">
-          <span className="font-mono text-[10px] tracking-[0.28em] text-muted uppercase">
+        <footer className="flex shrink-0 items-center justify-center">
+          <span className="font-mono text-[clamp(0.6rem,min(0.95vw,1.6vh),1.2rem)] tracking-[0.28em] text-muted uppercase">
             拉曼理工大学 · 华文学会 辩论社
           </span>
         </footer>

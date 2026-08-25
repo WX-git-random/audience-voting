@@ -5,8 +5,9 @@ import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
 import { votes } from "@/lib/db/schema"
 import { endAdminSession, isAdmin, startAdminSession, verifyPassword } from "@/lib/admin-auth"
+import { setVotingLocked } from "@/lib/vote-lock"
 
-export type AdminState = { error?: string; cleared?: number }
+export type AdminState = { error?: string; cleared?: number; locked?: boolean }
 
 export async function login(_prev: AdminState, formData: FormData): Promise<AdminState> {
   const password = String(formData.get("password") ?? "")
@@ -25,6 +26,21 @@ export async function login(_prev: AdminState, formData: FormData): Promise<Admi
 export async function logout() {
   await endAdminSession()
   redirect("/admin")
+}
+
+/**
+ * Opens or closes the ballot for everyone. Like clearAllVotes, the admin check
+ * happens server-side; submitVote re-reads the flag on every submission.
+ */
+export async function setBallotLock(locked: boolean): Promise<AdminState> {
+  if (!(await isAdmin())) return { error: "未授权" }
+
+  await setVotingLocked(locked)
+
+  revalidatePath("/")
+  revalidatePath("/view")
+  revalidatePath("/admin")
+  return { locked }
 }
 
 /**

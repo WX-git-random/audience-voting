@@ -9,3 +9,14 @@ export const votes = pgTable("votes", {
 })
 
 export type Vote = typeof votes.$inferSelect
+
+/**
+ * Tiny key/value store for session-wide switches (currently just the ballot
+ * lock). Kept in Postgres rather than memory so every serverless instance and
+ * every device agrees on whether voting is open.
+ */
+export const settings = pgTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+})
