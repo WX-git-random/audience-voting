@@ -43,9 +43,9 @@ export function ResultsView({ initial }: { initial: Results }) {
   const affPct = total > 0 ? ((teamCounts["正方"] ?? 0) / total) * 100 : 50
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-[1.4vh] md:flex-row md:gap-[1.4vw]">
+    <div className="flex min-h-0 flex-1 flex-col gap-[1.4vh]">
       {/* Team split */}
-      <HudPanel className="flex min-h-0 flex-[3] flex-col p-[min(2.2vw,2.4vh)]">
+      <HudPanel className="flex min-h-0 flex-1 flex-col p-[min(2.2vw,2.4vh)]">
         <div className="flex min-h-0 flex-1 flex-col gap-[2vh]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <HudLabel>Team Split / 阵营得票</HudLabel>
@@ -100,7 +100,7 @@ export function ResultsView({ initial }: { initial: Results }) {
       </HudPanel>
 
       {/* Best debater */}
-      <HudPanel accent="magenta" className="flex min-h-0 flex-[2] flex-col p-[min(2.2vw,2.4vh)]">
+      <HudPanel accent="magenta" className="flex min-h-0 flex-1 flex-col p-[min(2.2vw,2.4vh)]">
         <div className="flex min-h-0 flex-1 flex-col gap-[2vh]">
           <HudLabel>Best Debater · Top 3 / 最佳辩手 前三名</HudLabel>
 
