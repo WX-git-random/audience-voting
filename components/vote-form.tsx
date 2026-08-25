@@ -3,16 +3,28 @@
 import { submitVote, type VoteState } from "@/app/actions/vote"
 import { HudLabel, HudPanel } from "@/components/hud-frame"
 import { REGISTRATION_URL, SPEAKERS, TEAMS, teamOf } from "@/lib/vote-config"
+import { Lock } from "lucide-react"
 import { useState, useTransition } from "react"
-import { useSWRConfig } from "swr"
+import useSWR, { useSWRConfig } from "swr"
 
-export function VoteForm() {
+const lockFetcher = (url: string) =>
+  fetch(url).then((r) => r.json() as Promise<{ locked: boolean }>)
+
+export function VoteForm({ initialLocked }: { initialLocked: boolean }) {
   const [email, setEmail] = useState("")
   const [team, setTeam] = useState<string>(TEAMS[0])
   const [speaker, setSpeaker] = useState<string>(SPEAKERS[0])
   const [state, setState] = useState<VoteState>({ status: "idle", message: "" })
   const [pending, startTransition] = useTransition()
   const { mutate } = useSWRConfig()
+
+  // Poll so the ballot closes on the audience's phones within seconds of the
+  // admin flipping the switch, without anyone needing to refresh.
+  const { data } = useSWR("/api/results", lockFetcher, {
+    fallbackData: { locked: initialLocked },
+    refreshInterval: 5000,
+  })
+  const locked = data?.locked ?? initialLocked
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -31,6 +43,17 @@ export function VoteForm() {
           <p className="text-sm text-muted">投票可随时修改，以最后一次提交为准。</p>
         </div>
 
+        {locked && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="hud-clip-sm flex items-center gap-3 border border-magenta bg-magenta/15 px-4 py-3"
+          >
+            <Lock className="h-4 w-4 shrink-0 text-magenta" aria-hidden="true" />
+            <p className="text-sm leading-relaxed">投票通道已关闭，感谢参与。</p>
+          </div>
+        )}
+
         {/* Email */}
         <div className="flex flex-col gap-2">
           <label htmlFor="email" className="font-mono text-[11px] tracking-[0.24em] text-muted uppercase">
@@ -41,6 +64,7 @@ export function VoteForm() {
             type="email"
             required
             maxLength={99}
+            disabled={locked}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
@@ -60,7 +84,9 @@ export function VoteForm() {
               return (
                 <label
                   key={t}
-                  className={`hud-clip-sm cursor-pointer border px-4 py-4 text-center text-base transition-all ${
+                  className={`hud-clip-sm border px-4 py-4 text-center text-base transition-all ${
+                    locked ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                  } ${
                     active
                       ? isAff
                         ? "border-aff bg-aff/25 text-glow-aff"
@@ -73,6 +99,7 @@ export function VoteForm() {
                     name="team"
                     value={t}
                     checked={active}
+                    disabled={locked}
                     onChange={() => setTeam(t)}
                     className="sr-only"
                   />
@@ -95,7 +122,9 @@ export function VoteForm() {
               return (
                 <label
                   key={s}
-                  className={`hud-clip-sm cursor-pointer border px-2 py-3 text-center text-sm transition-all ${
+                  className={`hud-clip-sm border px-2 py-3 text-center text-sm transition-all ${
+                    locked ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                  } ${
                     active
                       ? isAff
                         ? "border-aff bg-aff/25"
@@ -108,6 +137,7 @@ export function VoteForm() {
                     name="speaker"
                     value={s}
                     checked={active}
+                    disabled={locked}
                     onChange={() => setSpeaker(s)}
                     className="sr-only"
                   />
@@ -120,10 +150,10 @@ export function VoteForm() {
 
         <button
           type="submit"
-          disabled={pending}
-          className="hud-clip-sm border border-violet bg-violet/25 px-6 py-4 font-mono text-sm tracking-[0.24em] uppercase transition-colors hover:bg-violet/40 disabled:opacity-50"
+          disabled={pending || locked}
+          className="hud-clip-sm border border-violet bg-violet/25 px-6 py-4 font-mono text-sm tracking-[0.24em] uppercase transition-colors hover:bg-violet/40 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {pending ? "Transmitting..." : "提交 / 修改投票"}
+          {locked ? "投票已关闭" : pending ? "Transmitting..." : "提交 / 修改投票"}
         </button>
 
         {state.status !== "idle" && (

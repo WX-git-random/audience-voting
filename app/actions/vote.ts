@@ -4,23 +4,27 @@ import { db } from "@/lib/db"
 import { votes } from "@/lib/db/schema"
 import { loadRegisteredEmails } from "@/lib/sheets"
 import { SPEAKERS, TEAMS, type Speaker, type Team } from "@/lib/vote-config"
+import { isVotingLocked } from "@/lib/vote-lock"
 import { eq, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 
 export type VoteState = {
-  status: "idle" | "success" | "error" | "unregistered"
+  status: "idle" | "success" | "error" | "unregistered" | "locked"
   message: string
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function getResults() {
-  const rows = await db
-    .select({
-      choiceTeam: votes.choiceTeam,
-      choiceSpeaker: votes.choiceSpeaker,
-    })
-    .from(votes)
+  const [rows, locked] = await Promise.all([
+    db
+      .select({
+        choiceTeam: votes.choiceTeam,
+        choiceSpeaker: votes.choiceSpeaker,
+      })
+      .from(votes),
+    isVotingLocked(),
+  ])
 
   const teamCounts = Object.fromEntries(TEAMS.map((t) => [t, 0])) as Record<Team, number>
   const speakerCounts = Object.fromEntries(SPEAKERS.map((s) => [s, 0])) as Record<Speaker, number>
@@ -30,7 +34,7 @@ export async function getResults() {
     if (row.choiceSpeaker in speakerCounts) speakerCounts[row.choiceSpeaker as Speaker] += 1
   }
 
-  return { total: rows.length, teamCounts, speakerCounts }
+  return { total: rows.length, teamCounts, speakerCounts, locked }
 }
 
 export async function getMyVote(email: string) {
@@ -46,6 +50,12 @@ export async function submitVote(input: {
   choiceSpeaker: string
 }): Promise<VoteState> {
   const email = input.email.trim().toLowerCase()
+
+  // The lock is enforced here, on the server, before anything else. Disabling
+  // the form is presentation only; this is the actual gate.
+  if (await isVotingLocked()) {
+    return { status: "locked", message: "投票已由主持方锁定，暂时无法提交或修改。" }
+  }
 
   if (!EMAIL_RE.test(email)) {
     return { status: "error", message: "请输入一个有效的电子邮箱" }

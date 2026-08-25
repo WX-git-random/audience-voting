@@ -3,6 +3,7 @@ import { count } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { votes } from "@/lib/db/schema"
 import { isAdmin } from "@/lib/admin-auth"
+import { isVotingLocked } from "@/lib/vote-lock"
 import { AdminLogin } from "@/components/admin-login"
 import { AdminPanel } from "@/components/admin-panel"
 
@@ -25,7 +26,10 @@ export default async function AdminPage() {
     )
   }
 
-  const [row] = await db.select({ value: count() }).from(votes)
+  const [[row], locked] = await Promise.all([
+    db.select({ value: count() }).from(votes),
+    isVotingLocked(),
+  ])
 
   return (
     <main className="flex min-h-dvh flex-col items-center gap-8 px-5 py-16">
@@ -33,7 +37,7 @@ export default async function AdminPage() {
         <span className="font-mono text-xs tracking-[0.35em] text-muted uppercase">Administrator</span>
         <h1 className="font-display text-3xl font-black tracking-[0.04em] text-balance md:text-4xl">管理后台</h1>
       </header>
-      <AdminPanel totalVotes={row?.value ?? 0} />
+      <AdminPanel totalVotes={row?.value ?? 0} initialLocked={locked} />
     </main>
   )
 }
